@@ -34,7 +34,7 @@ export function BusMapContainer() {
   const searchFor = searchParams.get("searchFor");
   const radius = searchParams.get("range");
 
-  const { data, isSuccess, isLoading } = useQuery({
+  const { data, isSuccess, fetchStatus } = useQuery({
     queryKey: ["bus-route-data", { searchType, searchFor, radius }],
     queryFn: () => queryFn(searchType, searchFor, radius),
     staleTime: Infinity, // cache results for this session
@@ -43,7 +43,7 @@ export function BusMapContainer() {
   return (
     <>
       <div className="w-full h-2">
-        {isLoading && (
+        {fetchStatus === "fetching" && (
           <progress className="progress progress-primary w-full"></progress>
         )}
       </div>
