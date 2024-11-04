@@ -34,18 +34,25 @@ export function BusMapContainer() {
   const searchFor = searchParams.get("searchFor");
   const radius = searchParams.get("range");
 
-  const { data, isSuccess } = useQuery({
+  const { data, isSuccess, isLoading } = useQuery({
     queryKey: ["bus-route-data", { searchType, searchFor, radius }],
     queryFn: () => queryFn(searchType, searchFor, radius),
     staleTime: Infinity, // cache results for this session
   });
 
   return (
-    <BusMap
-      lineData={isSuccess ? data.lineData : []}
-      lat={isSuccess ? data.lat : 0}
-      lng={isSuccess ? data.lng : 0}
-      radius={parseInt(radius ?? "500")}
-    />
+    <>
+      <div className="w-full h-2">
+        {isLoading && (
+          <progress className="progress progress-primary w-full"></progress>
+        )}
+      </div>
+      <BusMap
+        lineData={isSuccess ? data.lineData : []}
+        lat={isSuccess ? data.lat : 0}
+        lng={isSuccess ? data.lng : 0}
+        radius={parseInt(radius ?? "500")}
+      />
+    </>
   );
 }
