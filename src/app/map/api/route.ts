@@ -35,8 +35,8 @@ export async function GET(request: Request) {
     }
   } else {
     const latlngParts = searchFor.split(",");
-    latitude = parseInt(latlngParts[0]);
-    longitude = parseInt(latlngParts[1]);
+    latitude = parseFloat(latlngParts[0]);
+    longitude = parseFloat(latlngParts[1]);
   }
 
   try {

@@ -9,7 +9,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { DeckGLOverlay } from "./deckGLOverlay";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ColumnLayer, PathLayer } from "@deck.gl/layers";
+import { ColumnLayer, PathLayer, ScatterplotLayer } from "@deck.gl/layers";
 import type { PickingInfo } from "@deck.gl/core";
 import {
   LineData,
@@ -23,6 +23,7 @@ export interface BusMapProps {
   lineData: LineData;
   lat: number;
   lng: number;
+  radius: number;
 }
 
 const INITIAL_CAMERA = {
@@ -30,7 +31,7 @@ const INITIAL_CAMERA = {
   zoom: 15,
 };
 
-export function BusMap({ lineData, lat, lng }: BusMapProps) {
+export function BusMap({ lineData, lat, lng, radius }: BusMapProps) {
   const [mapIsReady, setMapIsReady] = useState(false);
   const handleTilesLoaded = useCallback(() => setMapIsReady(true), []);
 
@@ -68,6 +69,18 @@ export function BusMap({ lineData, lat, lng }: BusMapProps) {
     ];
   }, [lineData, lineWidth]);
 
+  const radiusLayer = useMemo(() => {
+    return new ScatterplotLayer<{ lat: number; lng: number }>({
+      id: "radius-layer",
+      data: [{ lat, lng }],
+      getPosition: (p) => [p.lng, p.lat],
+      getRadius: radius,
+      getLineColor: [0, 0, 0, 150],
+      getFillColor: [0, 0, 0, 30],
+      stroked: true,
+    });
+  }, [lat, lng, radius]);
+
   /* update camera with new lat/lng props */
   useEffect(() => {
     setCameraProps((prev) => ({
@@ -92,13 +105,14 @@ export function BusMap({ lineData, lat, lng }: BusMapProps) {
     <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string}>
       <Map
         {...cameraProps}
+        mapId="bus-routes-map"
         onTilesLoaded={handleTilesLoaded}
         onCameraChanged={handleCameraChange}
       >
         <Marker position={{ lat, lng }} />
         {mapIsReady && (
           <DeckGLOverlay
-            layers={lineLayers}
+            layers={[...lineLayers, radiusLayer]}
             initialViewState={{
               latitude: lat,
               longitude: lng,

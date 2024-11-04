@@ -37,6 +37,7 @@ export function BusMapContainer() {
   const { data, isSuccess } = useQuery({
     queryKey: ["bus-route-data", { searchType, searchFor, radius }],
     queryFn: () => queryFn(searchType, searchFor, radius),
+    staleTime: Infinity, // cache results for this session
   });
 
   return (
@@ -44,6 +45,7 @@ export function BusMapContainer() {
       lineData={isSuccess ? data.lineData : []}
       lat={isSuccess ? data.lat : 0}
       lng={isSuccess ? data.lng : 0}
+      radius={parseInt(radius ?? "500")}
     />
   );
 }
