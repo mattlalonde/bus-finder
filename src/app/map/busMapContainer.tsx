@@ -34,10 +34,11 @@ export function BusMapContainer() {
   const searchFor = searchParams.get("searchFor");
   const radius = searchParams.get("range");
 
-  const { data, isSuccess, fetchStatus } = useQuery({
+  const { data, fetchStatus } = useQuery<GetBusRouteDataResponse>({
     queryKey: ["bus-route-data", { searchType, searchFor, radius }],
     queryFn: () => queryFn(searchType, searchFor, radius),
     staleTime: Infinity, // cache results for this session
+    placeholderData: (previousData) => previousData,
   });
 
   return (
@@ -48,9 +49,9 @@ export function BusMapContainer() {
         )}
       </div>
       <BusMap
-        lineData={isSuccess ? data.lineData : []}
-        lat={isSuccess ? data.lat : 0}
-        lng={isSuccess ? data.lng : 0}
+        lineData={data?.lineData ?? unknowResponse.lineData}
+        lat={data?.lat ?? unknowResponse.lat}
+        lng={data?.lng ?? unknowResponse.lng}
         radius={parseInt(radius ?? "500")}
       />
     </>

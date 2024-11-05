@@ -12,7 +12,7 @@ export type BusRouteInfoFormProps = {
 const schema = yup
   .object({
     searchType: yup.string().required(),
-    searchFor: yup.string().required(),
+    searchFor: yup.string().required("Search For is a required field"),
     range: yup.number().positive().min(200).max(1500).integer().required(),
   })
   .required();
@@ -69,6 +69,14 @@ export function BusRouteInfoForm() {
               <option value="latlng">Lat/Lng</option>
             </select>
           </div>
+          {watch("searchType") === "latlng" && (
+            <p className="text-sm text-gray-300">
+              Enter values separated by a comma eg 'latitude,longitude'
+            </p>
+          )}
+          {errors.searchFor && (
+            <p className="text-error">{errors.searchFor.message}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
