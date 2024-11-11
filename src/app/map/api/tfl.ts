@@ -14,6 +14,7 @@ export async function getBusRouteData(
     new Set(placeData.places.flatMap((p) => p.lines.map((l) => l.id)))
   );
 
+  // TODO: refactor so calls to getLineData can be cached
   const lineResponses = await Promise.all(lineIds.map((id) => getLineData(id)));
   const lineCount = lineResponses.length;
   const hueGap = 360 / lineCount;
