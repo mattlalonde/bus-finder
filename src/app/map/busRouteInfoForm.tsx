@@ -6,7 +6,8 @@ import * as yup from "yup";
 import { useSearchParams } from "next/navigation";
 
 export type BusRouteInfoFormProps = {
-  onSubmit: () => void;
+  defaultValues?: Partial<BusRouteInfoFormValues>;
+  onSubmit: (values: BusRouteInfoFormValues) => void;
 };
 
 const schema = yup
@@ -17,11 +18,12 @@ const schema = yup
   })
   .required();
 
-interface FormValues extends yup.InferType<typeof schema> {}
+export interface BusRouteInfoFormValues extends yup.InferType<typeof schema> {}
 
-export function BusRouteInfoForm() {
-  const searchParams = useSearchParams();
-
+export function BusRouteInfoForm({
+  defaultValues,
+  onSubmit,
+}: BusRouteInfoFormProps) {
   const {
     register,
     handleSubmit,
@@ -30,22 +32,11 @@ export function BusRouteInfoForm() {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      range: searchParams.get("range")
-        ? parseInt(searchParams.get("range") as string)
-        : 500,
-      searchType: searchParams.get("searchType") ?? "postcode",
-      searchFor: searchParams.get("searchFor") ?? "",
+      range: defaultValues?.range ?? 500,
+      searchType: defaultValues?.searchType ?? "postcode",
+      searchFor: defaultValues?.searchFor ?? "",
     },
   });
-
-  const onSubmit = (values: FormValues) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("searchType", values.searchType);
-    params.set("searchFor", values.searchFor);
-    params.set("range", values.range.toString());
-
-    window.history.pushState(null, "", `?${params.toString()}`);
-  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
