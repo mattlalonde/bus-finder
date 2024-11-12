@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useSearchParams } from "next/navigation";
+import { BaseSyntheticEvent } from "react";
 
 export type BusRouteInfoFormProps = {
   defaultValues?: Partial<BusRouteInfoFormValues>;
@@ -12,7 +12,7 @@ export type BusRouteInfoFormProps = {
 
 const schema = yup
   .object({
-    searchType: yup.string().required(),
+    searchType: yup.string().required().oneOf(["postcode", "latlng"]),
     searchFor: yup.string().required("Search For is a required field"),
     range: yup.number().positive().min(200).max(1500).integer().required(),
   })
@@ -38,22 +38,32 @@ export function BusRouteInfoForm({
     },
   });
 
+  /* 
+    handleSubmit will call this function with a second argument of type BaseSyntheticEvent
+    which we don't want to expose to any parent component
+  */
+  const submit = (values: BusRouteInfoFormValues) => {
+    onSubmit(values);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(submit)}>
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <label htmlFor="searchFor">Search For:</label>
+          <label htmlFor="searchFor">Search For</label>
           <label htmlFor="searchType" className="sr-only">
-            Search type
+            Search Type
           </label>
           <div className="flex flex-row gap-2">
             <input
               {...register("searchFor")}
+              id="searchFor"
               placeholder="Search..."
               className="input flex-grow"
             />
             <select
               {...register("searchType")}
+              id="searchType"
               className="select select-bordered"
             >
               <option value="postcode">Postcode</option>
@@ -72,7 +82,7 @@ export function BusRouteInfoForm({
 
         <div className="flex flex-col gap-2">
           <div className="flex justify-between">
-            <label htmlFor="radius">Radius:</label>
+            <label htmlFor="range">Radius</label>
             <strong>
               <output htmlFor="radius">{`${watch("range")}m`}</output>
             </strong>
@@ -82,6 +92,7 @@ export function BusRouteInfoForm({
             <span className="text-xs">200m</span>
             <input
               {...register("range")}
+              id="range"
               type="range"
               min="200"
               max="1500"
