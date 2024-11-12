@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { BaseSyntheticEvent } from "react";
+import { useEffect } from "react";
 
 export type BusRouteInfoFormProps = {
   defaultValues?: Partial<BusRouteInfoFormValues>;
@@ -29,6 +29,7 @@ export function BusRouteInfoForm({
     handleSubmit,
     watch,
     formState: { errors },
+    setValue,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -38,9 +39,19 @@ export function BusRouteInfoForm({
     },
   });
 
+  useEffect(() => {
+    if (defaultValues) {
+      if (defaultValues.searchFor)
+        setValue("searchFor", defaultValues.searchFor);
+      if (defaultValues.searchType)
+        setValue("searchType", defaultValues.searchType);
+      if (defaultValues.range) setValue("range", defaultValues.range);
+    }
+  }, [defaultValues]);
+
   /* 
     handleSubmit will call this function with a second argument of type BaseSyntheticEvent
-    which we don't want to expose to any parent component
+    which we don't want to expose to any parent component or test
   */
   const submit = (values: BusRouteInfoFormValues) => {
     onSubmit(values);

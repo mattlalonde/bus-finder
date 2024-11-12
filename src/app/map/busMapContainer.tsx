@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { GetBusRouteDataResponse } from "./api/types";
 import { BusMap } from "./busMap";
+import { LatLngPair } from "@/models/LatLngPair";
 
 const unknowResponse: GetBusRouteDataResponse = {
   lineData: [],
@@ -41,6 +42,15 @@ export function BusMapContainer() {
     placeholderData: (previousData) => previousData,
   });
 
+  const onSelectLocation = ({ lat, lng }: LatLngPair) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("searchType", "latlng");
+    params.set("searchFor", `${lat},${lng}`);
+    params.set("range", radius?.toString() ?? "500");
+
+    window.history.pushState(null, "", `?${params.toString()}`);
+  };
+
   return (
     <>
       <div className="w-full h-2">
@@ -53,6 +63,7 @@ export function BusMapContainer() {
         lat={data?.lat ?? unknowResponse.lat}
         lng={data?.lng ?? unknowResponse.lng}
         radius={parseInt(radius ?? "500")}
+        onSelectLocation={onSelectLocation}
       />
     </>
   );

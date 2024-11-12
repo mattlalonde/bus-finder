@@ -5,6 +5,7 @@ import {
   Map,
   MapCameraChangedEvent,
   MapCameraProps,
+  MapMouseEvent,
   Marker,
 } from "@vis.gl/react-google-maps";
 import { DeckGLOverlay } from "./deckGLOverlay";
@@ -18,12 +19,14 @@ import {
   isLineDataItem,
   isLineStop,
 } from "@/models/LineMap";
+import { LatLngPair } from "@/models/LatLngPair";
 
 export interface BusMapProps {
   lineData: LineData;
   lat: number;
   lng: number;
   radius: number;
+  onSelectLocation?: ({ lat, lng }: LatLngPair) => void;
 }
 
 const INITIAL_CAMERA = {
@@ -31,7 +34,13 @@ const INITIAL_CAMERA = {
   zoom: 15,
 };
 
-export function BusMap({ lineData, lat, lng, radius }: BusMapProps) {
+export function BusMap({
+  lineData,
+  lat,
+  lng,
+  radius,
+  onSelectLocation,
+}: BusMapProps) {
   const [mapIsReady, setMapIsReady] = useState(false);
   const handleTilesLoaded = useCallback(() => setMapIsReady(true), []);
 
@@ -101,6 +110,19 @@ export function BusMap({ lineData, lat, lng, radius }: BusMapProps) {
     setLineWidth(newLineWidth);
   }, [cameraProps.zoom]);
 
+  const onClick = (e: MapMouseEvent) => {
+    if (e.detail.latLng && onSelectLocation) {
+      setCameraProps((prev) => ({
+        ...prev,
+        center: {
+          lat: e.detail.latLng?.lat ?? prev.center.lat,
+          lng: e.detail.latLng?.lng ?? prev.center.lng,
+        },
+      }));
+      onSelectLocation({ lat: e.detail.latLng.lat, lng: e.detail.latLng.lng });
+    }
+  };
+
   return (
     <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string}>
       <Map
@@ -108,6 +130,7 @@ export function BusMap({ lineData, lat, lng, radius }: BusMapProps) {
         mapId="bus-routes-map"
         onTilesLoaded={handleTilesLoaded}
         onCameraChanged={handleCameraChange}
+        onClick={onClick}
       >
         <Marker position={{ lat, lng }} />
         {mapIsReady && (
